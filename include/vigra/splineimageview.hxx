@@ -120,7 +120,7 @@ class SplineImageView
 
         /** The order of the spline used.
         */
-    enum StaticOrder { order = ORDER };
+    constexpr static int order = ORDER;
 
         /** The type of the internal image holding the spline coefficients.
         */
@@ -132,7 +132,8 @@ class SplineImageView
     typedef typename InternalTraverser::column_iterator InternalColumnIterator;
     typedef BSpline<ORDER, double> Spline;
 
-    enum { ksize_ = ORDER + 1, kcenter_ = ORDER / 2 };
+    constexpr static int ksize_ = ORDER + 1;
+    constexpr static int kcenter_ = ORDER / 2;
 
   public:
 
@@ -759,7 +760,7 @@ template <int ORDER, class VALUETYPE>
 typename SplineImageView<ORDER, VALUETYPE>::SquaredNormType
 SplineImageView<ORDER, VALUETYPE>::g2xx(double x, double y) const
 {
-    return SquaredNormType(2.0)*(squaredNorm(dxx(x,y)) + dot(dx(x,y), dx3(x,y)) + 
+    return SquaredNormType(2.0)*(squaredNorm(dxx(x,y)) + dot(dx(x,y), dx3(x,y)) +
                                  squaredNorm(dxy(x,y)) + dot(dy(x,y), dxxy(x,y)));
 }
 
@@ -767,7 +768,7 @@ template <int ORDER, class VALUETYPE>
 typename SplineImageView<ORDER, VALUETYPE>::SquaredNormType
 SplineImageView<ORDER, VALUETYPE>::g2yy(double x, double y) const
 {
-    return SquaredNormType(2.0)*(squaredNorm(dxy(x,y)) + dot(dx(x,y), dxyy(x,y)) + 
+    return SquaredNormType(2.0)*(squaredNorm(dxy(x,y)) + dot(dx(x,y), dxyy(x,y)) +
                                  squaredNorm(dyy(x,y)) + dot(dy(x,y), dy3(x,y)));
 }
 
@@ -775,7 +776,7 @@ template <int ORDER, class VALUETYPE>
 typename SplineImageView<ORDER, VALUETYPE>::SquaredNormType
 SplineImageView<ORDER, VALUETYPE>::g2xy(double x, double y) const
 {
-    return SquaredNormType(2.0)*(dot(dx(x,y), dxxy(x,y)) + dot(dy(x,y), dxyy(x,y)) + 
+    return SquaredNormType(2.0)*(dot(dx(x,y), dxxy(x,y)) + dot(dy(x,y), dxyy(x,y)) +
                                  dot(dxy(x,y), dxx(x,y) + dyy(x,y)));
 }
 
@@ -1869,7 +1870,7 @@ public:
     {
         copyImage(s, destImage(this->image_));
     }
-    
+
     template<class T, class SU>
     SplineImageView(MultiArrayView<2, T, SU> const & i, bool /* unused */ = false)
     : Base(i)

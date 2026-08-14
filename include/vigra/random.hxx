@@ -42,6 +42,7 @@
 #include "array_vector.hxx"
 
 #include <ctime>
+#include <cstdint>
 
     // includes to get the current process and thread IDs
     // to be used for automated seeding
@@ -133,7 +134,7 @@ void seed(RandomSeedTag, RandomState<EngineTag> & engine)
     seedData.push_back(static_cast<UInt32>(clock()));
     seedData.push_back(++globalCount);
 
-    std::size_t ptr((char*)&engine - (char*)0);
+    const uintptr_t ptr = reinterpret_cast<uintptr_t>(&engine);
     seedData.push_back(static_cast<UInt32>((ptr & 0xffffffff)));
     static const UInt32 shift = sizeof(ptr) > 4 ? 32 : 16;
     seedData.push_back(static_cast<UInt32>((ptr >> shift)));
@@ -152,11 +153,11 @@ void seed(RandomSeedTag, RandomState<EngineTag> & engine)
 
 #ifdef __APPLE__
     seedData.push_back(static_cast<UInt32>(getpid()));
-  #if __MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+  #if MAC_OS_X_VERSION_MAX_ALLOWED >= 101200
     uint64_t tid64;
     pthread_threadid_np(NULL, &tid64);
     seedData.push_back(static_cast<UInt32>(tid64));
-  #elif defined(SYS_thread_selfid) && (__MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+  #elif defined(SYS_thread_selfid) && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
     // SYS_thread_selfid was introduced in MacOS 10.6
     seedData.push_back(static_cast<UInt32>(syscall(SYS_thread_selfid)));
   #elif defined(SYS_gettid)

@@ -36,7 +36,6 @@
 # run with a simple 'pytest' in this directory
 # (and pytest installed, i.e. 'pip install pytest' or 'conda install pytest')
 
-from __future__ import division, print_function
 from functools import reduce
 
 import sys
@@ -50,18 +49,10 @@ import vigranumpytest as vt
 from vigra.arraytypes import AxisTags, AxisInfo
 import platform
 IS_PYPY = platform.python_implementation() == 'PyPy'
+IS_GEQ_3_14 = sys.version_info >= (3, 14)
 
-if sys.version_info[0] > 2:
-    def xrange(*args):
-        return range(*args)
 
-    def iteritems(dictionary, **kwargs):
-        return dictionary.items(**kwargs)
-else:
-    def iteritems(dictionary, **kwargs):
-        return dictionary.iteritems(**kwargs)
-
-numpyHasComplexNegateBug = numpy.version.version.startswith('1.0')
+numpyHasPtp = numpy.__version__.startswith(("1.", "2.0.", "2.1.", "2.2.", "2.3."))
 
 try:
     vt.testAny()
@@ -75,15 +66,12 @@ for n, f in vt.__dict__.items():
 
 # 2023/09
 # Small compatibility shims with old code that used
-#     assert_equal and assert_true
+#     assert_equal
 # from nosetest. Rewriting the tests to use python's assert statement
 # was decided to be too invasive.
 def assert_equal(x, y):
     assert x == y
 
-
-def assert_true(x):
-    assert x
 
 
 def checkShape(shape1, shape2):
@@ -108,7 +96,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         def testCopy(img):
             b = cls(img, order='A')
             if not IS_PYPY:
-                assert_equal(sys.getrefcount(b), 2)
+                assert_equal(sys.getrefcount(b), 1 if IS_GEQ_3_14 else 2)
             assert b.__class__ is img.__class__
             assert_equal(b.shape, img.shape)
             assert_equal(b.strides, img.strides)
@@ -119,7 +107,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
             assert not numpy.may_share_memory(b, img)
             b = img.copy(order='A')
             if not IS_PYPY:
-                assert_equal(sys.getrefcount(b), 2)
+                assert_equal(sys.getrefcount(b), 1 if IS_GEQ_3_14 else 2)
             assert_equal(b.shape, img.shape)
             assert_equal(b.strides, img.strides)
             assert_equal(b.order, img.order)
@@ -161,7 +149,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         assert isinstance(img, numpy.ndarray)
         assert_equal(img.dtype, numpy.float32)
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(img), 2)
+            assert_equal(sys.getrefcount(img), 1 if IS_GEQ_3_14 else 2)
 
         # test shape
         checkShape(img.shape, vshape)
@@ -177,7 +165,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         if channels > 1:
             assert_equal(img.order, "V" if hasChannelAxis else "F")
         else:
-            assert_true(img.order in ['V', 'F'])
+            assert img.order in ['V', 'F']
         assert_equal(img.flags.c_contiguous, False)
 
         # test axistags
@@ -186,7 +174,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         assert_equal(img.withAxes('y', 'z', 'x', 'c').axistags, axistags4)
         assert_equal(img.withAxes('yzxc').axistags, axistags4)
         assert_equal(img.withAxes(axistags4).axistags, axistags4)
-        assert_true(img.withAxes(img.axistags) is img)
+        assert img.withAxes(img.axistags) is img
         array = img.noTags()
         assert_equal(type(array), numpy.ndarray)
         assert_equal(arraytypes.taggedView(array, vaxistags).axistags, vaxistags)
@@ -228,7 +216,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         # test shape, strides, and copy for 'F' order
         img = cls(fshape, order='F')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(img), 2)
+            assert_equal(sys.getrefcount(img), 1 if IS_GEQ_3_14 else 2)
         checkShape(img.shape, fshape)
         checkStride(img.strides, ffstrides)
         assert_equal(img.axistags, faxistags)
@@ -259,13 +247,13 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         # test shape, strides, and copy for 'A' order (should be equal to 'V' order)
         img = cls(vshape, order='A')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(img), 2)
+            assert_equal(sys.getrefcount(img), 1 if IS_GEQ_3_14 else 2)
         checkShape(img.shape, vshape)
         checkStride(img.strides, fvstrides)
         if channels > 1:
             assert_equal(img.order, "V" if hasChannelAxis else "F")
         else:
-            assert_true(img.order in ['V', 'F'])
+            assert img.order in ['V', 'F']
         assert_equal(img.flags.c_contiguous, False)
         assert_equal(img.axistags, vaxistags)
         img[1,2] = value
@@ -280,7 +268,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         # test shape, strides, and copy for 'C' order
         img = cls(cshape, order='C')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(img), 2)
+            assert_equal(sys.getrefcount(img), 1 if IS_GEQ_3_14 else 2)
         checkShape(img.shape, cshape)
         checkStride(img.strides, fcstrides)
         assert_equal(img.axistags, caxistags)
@@ -312,14 +300,14 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         img = cls(vshape, order="V")
         b = cls(img, dtype=numpy.uint8, order='V')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(b), 2)
+            assert_equal(sys.getrefcount(b), 1 if IS_GEQ_3_14 else 2)
         assert_equal(b.dtype, numpy.uint8)
         checkShape(b.shape, img.shape)
         checkStride(b.strides, computeVStrides(b.shape, hasChannelAxis))
         if channels > 1:
             assert_equal(img.order, "V" if hasChannelAxis else "F")
         else:
-            assert_true(img.order in ['V', 'F'])
+            assert img.order in ['V', 'F']
         assert_equal(b.axistags, img.axistags)
         assert_equal(b.flags.c_contiguous, False)
         assert (b==img).all()
@@ -336,7 +324,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         img = cls(cshape, order="C")
         b = cls(img, dtype=numpy.uint8, order='C')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(b), 2)
+            assert_equal(sys.getrefcount(b), 1 if IS_GEQ_3_14 else 2)
         checkShape(b.shape, img.shape)
         checkStride(b.strides, computeCStrides(b.shape))
         assert_equal(b.axistags, img.axistags)
@@ -354,7 +342,7 @@ def checkArray(cls, channels, dim, hasChannelAxis=True):
         img = cls(fshape, order="F")
         b = cls(img, dtype=numpy.uint8, order='F')
         if not IS_PYPY:
-            assert_equal(sys.getrefcount(b), 2)
+            assert_equal(sys.getrefcount(b), 1 if IS_GEQ_3_14 else 2)
         checkShape(b.shape, img.shape)
         checkStride(b.strides, computeFStrides(b.shape))
         assert_equal(b.axistags, img.axistags)
@@ -1373,13 +1361,13 @@ def testZMQ():
 
 def testSlicing():
     a = arraytypes.Vector2Volume((5,4,3))
-    a.flat[...] = xrange(a.size)
+    a.flat[...] = range(a.size)
 
     tags = arraytypes.VigraArray.defaultAxistags('xyzc')
     assert_equal(tags, a.axistags)
 
     b = a[...]
-    assert_true((a==b).all())
+    assert (a==b).all()
     assert_equal(tags, b.axistags)
 
     b = a[...,0]
@@ -1420,17 +1408,17 @@ def testSlicing():
 
     b = a.subarray((4,3,2))
     assert_equal(b.shape, (4,3,2,2))
-    assert_true((a[:4,:3,:2,:]==b).all())
+    assert (a[:4,:3,:2,:]==b).all()
     assert_equal(tags, b.axistags)
 
     b = a.subarray((1,1,1),(4,3,2))
     assert_equal(b.shape, (3,2,1,2))
-    assert_true((a[1:4,1:3,1:2]==b).all())
+    assert (a[1:4,1:3,1:2]==b).all()
     assert_equal(tags, b.axistags)
 
     b = a.subarray((1,1,1,1),(4,3,2,2))
     assert_equal(b.shape, (3,2,1,1))
-    assert_true((a[1:4,1:3,1:2,1:]==b).all())
+    assert (a[1:4,1:3,1:2,1:]==b).all()
     assert_equal(tags, b.axistags)
 
 def testMethods():
@@ -1439,7 +1427,7 @@ def testMethods():
 
     a.ravel()[...] = range(a.size)
 
-    for k, i in zip(a.flat, xrange(a.size)):
+    for k, i in zip(a.flat, range(a.size)):
         assert_equal(k, i)
 
     assert (a.flatten() == range(a.size)).all()
@@ -1484,8 +1472,9 @@ def testMethods():
     assert_equal(ones.prod(), 1.0)
     assert (ones.prod(axis='y') == [1]*ones.shape[0]).all()
 
-    assert_equal(a.ptp(), a.size-1)
-    assert (a.ptp(axis='x') == [a.shape[0]-1]*a.shape[1]).all()
+    if numpyHasPtp:
+        assert_equal(a.ptp(), a.size-1)
+        assert (a.ptp(axis='x') == [a.shape[0]-1]*a.shape[1]).all()
 
     r = arraytypes.ScalarImage((2,2))
     r.ravel()[...] = range(4)
@@ -1564,12 +1553,11 @@ def testUfuncs():
     for t in types:
         arrays[t] = arraytypes.ScalarImage((2,2), t, value=2)
         ones[t] = arraytypes.ScalarImage((1,1), t, value=1)
-    for t, a in iteritems(arrays):
+    for t, a in arrays.items():
         b = -a
         assert_equal(t, b.dtype)
         assert_equal(a.axistags, b.axistags)
-        if not numpyHasComplexNegateBug or t is not clongdouble:
-            assert (b == -t(2)).all()
+        assert (b == -t(2)).all()
         b = a + a
         assert_equal(t, b.dtype)
         assert_equal(a.axistags, b.axistags)

@@ -1,8 +1,6 @@
-﻿import sys
 import numpy as np
+numpyHasPtp = np.__version__.startswith(("1.", "2.0.", "2.1.", "2.2.", "2.3."))
 
-if sys.version_info[0] > 2:
-    xrange = range
 
 class TaggedArray(np.ndarray):
 
@@ -81,7 +79,7 @@ class TaggedArray(np.ndarray):
 
     def nonzero(self):
         res = np.ndarray.nonzero(self)
-        for k in xrange(len(res)):
+        for k in range(len(res)):
             res[k].axistags = [self.axistags[k]]
         return res
 
@@ -91,11 +89,12 @@ class TaggedArray(np.ndarray):
             del res.axistags[axis]
         return res
 
-    def ptp(self, axis=None, out=None):
-        res = np.ndarray.ptp(self, axis, out)
-        if axis is not None:
-            del res.axistags[axis]
-        return res
+    if numpyHasPtp:
+        def ptp(self, axis=None, out=None):
+            res = np.ndarray.ptp(self, axis, out)
+            if axis is not None:
+                del res.axistags[axis]
+            return res
 
     def ravel(self, order='C'):
         res = np.ndarray.ravel(self, order)
@@ -120,7 +119,7 @@ class TaggedArray(np.ndarray):
 
     def squeeze(self):
         res = np.ndarray.squeeze(self)
-        for k in xrange(self.ndim-1, -1, -1):
+        for k in range(self.ndim-1, -1, -1):
             if self.shape[k] == 1:
                 del res.axistags[k]
         return res

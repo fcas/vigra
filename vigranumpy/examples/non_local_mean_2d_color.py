@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 import vigra
 from vigra import numpy
@@ -8,7 +7,7 @@ import multiprocessing
 
 path = "69015.jpg"
 #path = "12074.jpg"
-path = "100075.jpg" 
+path = "100075.jpg"
 path = "12003.jpg"
 data = vigra.impex.readImage(path).astype(numpy.float32)
 

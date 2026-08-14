@@ -100,7 +100,7 @@ In order to prevent overflow, necessary upcasting is performed before
 the function is executed.
 '''
 
-class Function(object):
+class Function:
     test_types = numpy.typecodes['AllInteger'][:-2] + numpy.typecodes['AllFloat']+'O'
     len_test_types = len(test_types)
     kindToNumber = {'b': 1, 'u': 2, 'i': 2, 'f': 3, 'c': 4}
@@ -192,7 +192,7 @@ class Function(object):
             highestArrayType = arrayTypes[-1]
 
         if self.is_bool:
-            return (highestArrayType[-1], numpy.bool8)
+            return (highestArrayType[-1], numpy.bool_)
 
         scalarType = [numpy.dtype(type(x)) for x in args if numpy.isscalar(x)]
         if not scalarType:

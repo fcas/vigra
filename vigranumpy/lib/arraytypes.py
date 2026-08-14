@@ -32,27 +32,20 @@
 #    OTHER DEALINGS IN THE SOFTWARE.
 #
 #######################################################################
-from __future__ import print_function
 from functools import reduce
 
 import sys
 import copy
 import numpy
+
 from . import ufunc
 import vigra.vigranumpycore as vigranumpycore
 
 from vigra.vigranumpycore import AxisType, AxisInfo, AxisTags
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    # Python 2.7
-    from collections import Iterable
+from collections.abc import Iterable
 
-
-if sys.version_info[0] > 2:
-    buffer = memoryview
-    xrange = range
+numpyHasPtp = numpy.__version__.startswith(("1.", "2.0.", "2.1.", "2.2.", "2.3."))
 
 def _preserve_doc(f):
     npy_doc = eval('numpy.ndarray.%s.__doc__' % f.__name__)
@@ -97,7 +90,7 @@ def _numpyarray_overloaded_function(f, self, axis=None, dtype=None, out=None):
             del res.axistags[axis]
         return res
 
-class classproperty(object):
+class classproperty:
     def __get__(self, instance, cls):
             if self.__instance_method is not None and instance is not None:
                 return self.__instance_method(instance)
@@ -339,7 +332,7 @@ def _constructArrayFromPickle(_arraypickle, _permutation, _axistags):
 def _constructArrayFromZMQSocket(socket, flags=0, copy=True, track=False):
     metadata = socket.recv_json(flags=flags)
     axistags = AxisTags.fromJSON(socket.recv(flags=flags))
-    data = buffer(socket.recv(flags=flags, copy=copy, track=track))
+    data = memoryview(socket.recv(flags=flags, copy=copy, track=track))
     array = numpy.frombuffer(data, dtype=metadata['dtype']).reshape(metadata['shape'])
     array = taggedView(array.transpose(metadata['permutation']), axistags)
     return array
@@ -907,12 +900,12 @@ class VigraArray(numpy.ndarray):
         return self.axistags.axisTypeCount(AxisType.Space)
 
     def iterImpl(self, type):
-        axes = [k for k in xrange(self.ndim) if self.axistags[k].isType(type)]
+        axes = [k for k in range(self.ndim) if self.axistags[k].isType(type)]
         if axes:
             axes.sort(key=lambda x: self.axistags[x], reverse=True)
             slices = [slice(None)]*self.ndim
             for point in numpy.ndindex(*(self.shape[k] for k in axes)):
-                for j in xrange(len(point)):
+                for j in range(len(point)):
                     slices[axes[j]] = point[j]
                 yield self[tuple(slices)]
         else:
@@ -984,7 +977,7 @@ class VigraArray(numpy.ndarray):
         if i < self.ndim:
             if not self.axistags[i].isSpatial():
                 raise RuntimeError("VigraArray.sliceIter(): %s is not a spatial axis." % key)
-            for k in xrange(self.shape[i]):
+            for k in range(self.shape[i]):
                 yield self.bindAxis(i, k)
         else:
             yield self
@@ -1121,7 +1114,7 @@ class VigraArray(numpy.ndarray):
                 else:
                     axisinfo.append(tag)
                     slicing.append(axisinfo[-1])
-            for k in xrange(self.ndim):
+            for k in range(self.ndim):
                 if self.axistags[k].isType(AxisType.UnknownAxisType):
                     raise RuntimeError("VigraArray.withAxes(): array must not contain axes of unknown type (key '?').")
                 if slicing[k] == 0 and self.shape[k] != 1:
@@ -1422,7 +1415,7 @@ class VigraArray(numpy.ndarray):
     @_preserve_doc
     def nonzero(self):
         res = tuple(k.view(type(self)) for k in numpy.ndarray.nonzero(self))
-        for k in xrange(len(res)):
+        for k in range(len(res)):
             res[k].axistags = AxisTags(AxisInfo(self.axistags[k]))
         return res
 
@@ -1444,22 +1437,23 @@ class VigraArray(numpy.ndarray):
         '''
         return _numpyarray_overloaded_function(numpy.ndarray.prod, self, axis, dtype, out)
 
-    @_preserve_doc
-    def ptp(self, axis=None, out=None):
-        '''
-        The 'axis' parameter can be an int (axis position) or string (axis key).
-        '''
-        if type(axis) == str:
-            axis = self.axistags.index(axis)
-        if axis is None:
-            return self.transposeToOrder('C').view(numpy.ndarray).ptp(out=out)
-        else:
-            res = self.view(numpy.ndarray).ptp(axis, out)
-            if out is None:
-                res = res.view(VigraArray)
-                res.axistags = self._copy_axistags()
-                del res.axistags[axis]
-            return res
+    if numpyHasPtp:
+        @_preserve_doc
+        def ptp(self, axis=None, out=None):
+            '''
+            The 'axis' parameter can be an int (axis position) or string (axis key).
+            '''
+            if type(axis) == str:
+                axis = self.axistags.index(axis)
+            if axis is None:
+                return numpy.ptp(self.transposeToOrder('C').view(numpy.ndarray), out=out)
+            else:
+                res = numpy.ptp(self.view(numpy.ndarray), axis=axis, out=out)
+                if out is None:
+                    res = res.view(VigraArray)
+                    res.axistags = self._copy_axistags()
+                    del res.axistags[axis]
+                return res
 
     @_preserve_doc
     def ravel(self, order='C'):
@@ -1522,7 +1516,7 @@ class VigraArray(numpy.ndarray):
         res = numpy.ndarray.squeeze(self)
         if self.ndim != res.ndim:
             res.axistags = res._copy_axistags()
-            for k in xrange(self.ndim-1, -1, -1):
+            for k in range(self.ndim-1, -1, -1):
                 if self.shape[k] == 1:
                     del res.axistags[k]
         return res

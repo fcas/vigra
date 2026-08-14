@@ -29,7 +29,7 @@
 /*    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,      */
 /*    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING      */
 /*    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR     */
-/*    OTHER DEALINGS IN THE SOFTWARE.                                   */                
+/*    OTHER DEALINGS IN THE SOFTWARE.                                   */
 /*                                                                      */
 /************************************************************************/
 
@@ -46,9 +46,10 @@
 #include "utilities.hxx"
 #include "multi_shape.hxx"
 
-#include <functional>
-#include <vector>
 #include <cmath>
+#include <functional>
+#include <memory>
+#include <vector>
 
 namespace vigra {
 
@@ -315,9 +316,9 @@ inline double angularGaborSigma(int directionCount, double centerFrequency)
     <b>\#include</b> \<vigra/gaborfilter.hxx\><br/>
     Namespace: vigra
 */
-template <class ImageType, 
-          class Alloc = typename ImageType::allocator_type::template rebind<ImageType>::other >
-class GaborFilterFamily 
+template <class ImageType,
+          class Alloc = typename std::allocator_traits<typename ImageType::allocator_type>::template rebind_alloc<ImageType> >
+class GaborFilterFamily
 : public ImageArray<ImageType, Alloc>
 {
     typedef ImageArray<ImageType, Alloc> ParentClass;
@@ -371,7 +372,7 @@ public:
                       int directionCount = stdDirectionCount, int scaleCount = stdScaleCount,
                       double maxCenterFrequency = 3.0/8.0,
                       Alloc const & alloc = Alloc())
-        : ParentClass(directionCount*scaleCount, 
+        : ParentClass(directionCount*scaleCount,
                       Size2D(width, height > 0 ? height : width), alloc),
           scaleCount_(scaleCount),
           directionCount_(directionCount),

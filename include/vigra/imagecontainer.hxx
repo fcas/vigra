@@ -39,6 +39,7 @@
 #include "utilities.hxx"
 #include "array_vector.hxx"
 #include "copyimage.hxx"
+#include <memory>
 
 namespace vigra {
 
@@ -68,7 +69,7 @@ namespace vigra {
     Namespace: vigra
 */
 template <class ImageType,
-      class Alloc = typename ImageType::allocator_type::template rebind<ImageType>::other >
+      class Alloc = typename std::allocator_traits<typename ImageType::allocator_type>::template rebind_alloc<ImageType> >
 class ImageArray
 {
     Size2D imageSize_;
@@ -449,11 +450,11 @@ public:
     An ImagePyramid manages an array of images of the type given as
     template parameter, where each level has half the width and height
     of its predecessor.  It actually represents a sequence of pyramid
-    levels whose start and end index are configurable.  
-    
+    levels whose start and end index are configurable.
+
     To initialize all pyramid levels in the sense of a Gaussian pyramid,
     use \ref pyramidReduceBurtFilter() and \ref pyramidExpandBurtFilter().
-    To create and reconstruct a Laplcaian pyramid, use 
+    To create and reconstruct a Laplcaian pyramid, use
     \ref pyramidReduceBurtLaplacian() and \ref pyramidExpandBurtLaplacian().
 
     A customized allocator can be passed as a template argument and
@@ -464,7 +465,7 @@ public:
     Namespace: vigra
 */
 template <class ImageType,
-      class Alloc = typename ImageType::allocator_type::template rebind<ImageType>::other >
+      class Alloc = typename std::allocator_traits<typename ImageType::allocator_type>::template rebind_alloc<ImageType> >
 class ImagePyramid
 {
     int lowestLevel_, highestLevel_;

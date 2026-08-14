@@ -1,44 +1,42 @@
 ﻿#######################################################################
-#                                                                      
+#
 #         Copyright 2009-2013 by Ullrich Koethe and Thorben Kroeger
-#                                                                      
-#    This file is part of the VIGRA computer vision library.           
-#    The VIGRA Website is                                              
-#        http://hci.iwr.uni-heidelberg.de/vigra/                       
-#    Please direct questions, bug reports, and contributions to        
-#        ullrich.koethe@iwr.uni-heidelberg.de    or                    
-#        vigra@informatik.uni-hamburg.de                               
-#                                                                      
-#    Permission is hereby granted, free of charge, to any person       
-#    obtaining a copy of this software and associated documentation    
-#    files (the "Software"), to deal in the Software without           
-#    restriction, including without limitation the rights to use,      
-#    copy, modify, merge, publish, distribute, sublicense, and/or      
-#    sell copies of the Software, and to permit persons to whom the    
-#    Software is furnished to do so, subject to the following          
-#    conditions:                                                       
-#                                                                      
-#    The above copyright notice and this permission notice shall be    
-#    included in all copies or substantial portions of the             
-#    Software.                                                         
-#                                                                      
-#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND    
-#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES   
-#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND          
-#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT       
-#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,      
-#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING      
-#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR     
-#    OTHER DEALINGS IN THE SOFTWARE.                                   
-#                                                                      
+#
+#    This file is part of the VIGRA computer vision library.
+#    The VIGRA Website is
+#        http://hci.iwr.uni-heidelberg.de/vigra/
+#    Please direct questions, bug reports, and contributions to
+#        ullrich.koethe@iwr.uni-heidelberg.de    or
+#        vigra@informatik.uni-hamburg.de
+#
+#    Permission is hereby granted, free of charge, to any person
+#    obtaining a copy of this software and associated documentation
+#    files (the "Software"), to deal in the Software without
+#    restriction, including without limitation the rights to use,
+#    copy, modify, merge, publish, distribute, sublicense, and/or
+#    sell copies of the Software, and to permit persons to whom the
+#    Software is furnished to do so, subject to the following
+#    conditions:
+#
+#    The above copyright notice and this permission notice shall be
+#    included in all copies or substantial portions of the
+#    Software.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND
+#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#    OTHER DEALINGS IN THE SOFTWARE.
+#
 #######################################################################
 
-from __future__ import division, print_function
 import sys
 print("\nexecuting test file", __file__, file=sys.stderr)
 exec(compile(open('set_paths.py', "rb").read(), 'set_paths.py', 'exec'))
 
-from nose.tools import assert_equal, raises, assert_raises, assert_true
 import vigra
 import numpy
 
@@ -69,8 +67,8 @@ def test_gray2qimage():
     tmp2 = vigra.impex.readImage("tmp2.png")
     
     for i in range(3):
-        assert_true( (tmp1 == tmp2[:,:,i]).all() )
-    assert_true( (tmp2[:,:,3] == 255).all() )
+        assert (tmp1 == tmp2[:,:,i]).all()
+    assert (tmp2[:,:,3] == 255).all()
 
 def test_alphamodulated2qimage():
     if not _have_qt:
@@ -93,15 +91,11 @@ def test_alphamodulated2qimage():
     tmp2 = byte_view(img)
     tmp2 = tmp2.swapaxes(0,1)
     
-    assert_true( tmp1.shape[0:2] == tmp2.shape[0:2] )
-    assert_true( tmp2.ndim == 3 )
-    assert_true( tmp2.shape[2] == 4 )
+    assert tmp1.shape[0:2] == tmp2.shape[0:2]
+    assert tmp2.ndim == 3
+    assert tmp2.shape[2] == 4
     
-    assert_true( (tmp2[:,:,0] == 0).all() )
-    assert_true( (tmp2[:,:,2] == 0).all() )
-    assert_true( (tmp2[:,:,3] == tmp1).all() )
-    assert_true( (tmp2[:,:,1] == tmp1).all() )
-
-if __name__ == '__main__':
-    import nose
-    nose.run(defaultTest=__file__)
+    assert (tmp2[:,:,0] == 0).all()
+    assert (tmp2[:,:,2] == 0).all()
+    assert (tmp2[:,:,3] == tmp1).all()
+    assert (tmp2[:,:,1] == tmp1).all()

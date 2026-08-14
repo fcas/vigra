@@ -1,45 +1,43 @@
 ﻿#######################################################################
-#                                                                      
-#         Copyright 2009-2010 by Ullrich Koethe                        
-#                                                                      
-#    This file is part of the VIGRA computer vision library.           
-#    The VIGRA Website is                                              
-#        http://hci.iwr.uni-heidelberg.de/vigra/                       
-#    Please direct questions, bug reports, and contributions to        
-#        ullrich.koethe@iwr.uni-heidelberg.de    or                    
-#        vigra@informatik.uni-hamburg.de                               
-#                                                                      
-#    Permission is hereby granted, free of charge, to any person       
-#    obtaining a copy of this software and associated documentation    
-#    files (the "Software"), to deal in the Software without           
-#    restriction, including without limitation the rights to use,      
-#    copy, modify, merge, publish, distribute, sublicense, and/or      
-#    sell copies of the Software, and to permit persons to whom the    
-#    Software is furnished to do so, subject to the following          
-#    conditions:                                                       
-#                                                                      
-#    The above copyright notice and this permission notice shall be    
-#    included in all copies or substantial portions of the             
-#    Software.                                                         
-#                                                                      
-#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND    
-#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES   
-#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND          
-#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT       
-#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,      
-#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING      
-#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR     
-#    OTHER DEALINGS IN THE SOFTWARE.                                   
-#                                                                      
+#
+#         Copyright 2009-2010 by Ullrich Koethe
+#
+#    This file is part of the VIGRA computer vision library.
+#    The VIGRA Website is
+#        http://hci.iwr.uni-heidelberg.de/vigra/
+#    Please direct questions, bug reports, and contributions to
+#        ullrich.koethe@iwr.uni-heidelberg.de    or
+#        vigra@informatik.uni-hamburg.de
+#
+#    Permission is hereby granted, free of charge, to any person
+#    obtaining a copy of this software and associated documentation
+#    files (the "Software"), to deal in the Software without
+#    restriction, including without limitation the rights to use,
+#    copy, modify, merge, publish, distribute, sublicense, and/or
+#    sell copies of the Software, and to permit persons to whom the
+#    Software is furnished to do so, subject to the following
+#    conditions:
+#
+#    The above copyright notice and this permission notice shall be
+#    included in all copies or substantial portions of the
+#    Software.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND
+#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#    OTHER DEALINGS IN THE SOFTWARE.
+#
 #######################################################################
 
-from __future__ import division, print_function
 import sys
 print("\nexecuting test file", __file__, file=sys.stderr)
 exec(compile(open('set_paths.py', "rb").read(), 'set_paths.py', 'exec'))
 
 
-from nose.tools import assert_equal, raises
 import numpy as np
 import numpy as numpy
 from vigra import graphs as vigraph
@@ -155,7 +153,7 @@ def testGridGraphAgglomerativeClustering():
     g1  = graphs.regionAdjacencyGraph(graph=g0,labels=labels)
     assert g1.nodeNum == 5
 
-class TestGraph(object):
+class TestGraph:
 
     def testAddNodesWithIds(self):
 
@@ -233,7 +231,7 @@ class TestGraph(object):
             [1,5],
             [5,7],
             [3,4]
-        ] 
+        ]
 
         edges = np.array(elist,dtype=np.uint32)
         nodeIds = np.unique(edges.reshape(-1))
@@ -273,17 +271,17 @@ class TestGraph(object):
         g.addNode(3)
         nodes = [n for n in g.nodeIter()]
         assert len(nodes)==1
-        assert g.id(nodes[0]) == 3 
+        assert g.id(nodes[0]) == 3
 
         g.addNode(6)
         nodes = [n for n in g.nodeIter()]
         assert len(nodes)==2
-        assert g.id(nodes[0]) == 3 
-        assert g.id(nodes[1]) == 6 
+        assert g.id(nodes[0]) == 3
+        assert g.id(nodes[1]) == 6
 
         g.addNode(2)
         nodes = [n for n in g.nodeIter()]
         assert len(nodes)==3
-        assert g.id(nodes[0]) == 2 
-        assert g.id(nodes[1]) == 3 
-        assert g.id(nodes[2]) == 6 
+        assert g.id(nodes[0]) == 2
+        assert g.id(nodes[1]) == 3
+        assert g.id(nodes[2]) == 6

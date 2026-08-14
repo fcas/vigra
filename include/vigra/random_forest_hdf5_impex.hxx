@@ -39,9 +39,10 @@
 #include "config.hxx"
 #include "random_forest.hxx"
 #include "hdf5impex.hxx"
+#include <algorithm>
 #include <string>
 
-namespace vigra 
+namespace vigra
 {
 
 static const char *const rf_hdf5_options       = "_options";
@@ -160,11 +161,11 @@ inline std::string get_cwd(HDF5File & h5context)
 
 /** \brief Save a random forest to an HDF5File object into a specified HDF5
            group.
-    
+
     The random forest is saved as a set of HDF5 datasets, groups, and
     attributes below a certain HDF5 group (default: current group of the
     HDF5File object). No additional data should be stored in that group.
-    
+
     \param rf        Random forest object to be exported
     \param h5context HDF5File object to use
     \param pathname  If empty or not supplied, save the random forest to the
@@ -203,11 +204,11 @@ void rf_export_HDF5(const RandomForest<T, Tag> & rf,
 
 /** \brief Save a random forest to a named HDF5 file into a specified HDF5
            group.
-    
+
     The random forest is saved as a set of HDF5 datasets, groups, and
     attributes below a certain HDF5 group (default: root). No additional data
     should be stored in that group.
-    
+
     \param rf       Random forest object to be exported
     \param filename Name of an HDF5 file to open
     \param pathname If empty or not supplied, save the random forest to the
@@ -217,7 +218,7 @@ void rf_export_HDF5(const RandomForest<T, Tag> & rf,
 */
 template<class T, class Tag>
 void rf_export_HDF5(const RandomForest<T, Tag> & rf,
-                    const std::string & filename, 
+                    const std::string & filename,
                     const std::string & pathname = "")
 {
     HDF5File h5context(filename , HDF5File::Open);
@@ -252,11 +253,11 @@ void rf_export_HDF5(const RandomForest<T, Tag> & rf,
 }
 
 /** \brief Read a random forest from an HDF5File object's specified group.
-    
+
     The random forest is read from a certain HDF5 group (default: current group
     of the HDF5File object) as a set of HDF5 datasets, groups, and
     attributes. No additional data should be present in that group.
-    
+
     \param rf        Random forest object to be imported
     \param h5context HDF5File object to use
     \param pathname  If empty or not supplied, read from the random forest
@@ -292,6 +293,9 @@ bool rf_import_HDF5(RandomForest<T, Tag> & rf,
     // get all groups in base path
     // no check for the rf_hdf5_tree prefix...
     std::vector<std::string> names = h5context.ls();
+    // HDF5File::ls() uses H5_ITER_NATIVE, which does not guarantee alphabetical
+    // order. Sort so that trees are imported in the same order they were exported.
+    std::sort(names.begin(), names.end());
     std::vector<std::string>::const_iterator j;
     for (j = names.begin(); j != names.end(); ++j)
     {
@@ -307,11 +311,11 @@ bool rf_import_HDF5(RandomForest<T, Tag> & rf,
 }
 
 /** \brief Read a random forest from a named HDF5 file's specified group.
-    
+
     The random forest is read from a certain HDF5 group (default: root group
     of the HDF5 file) as a set of HDF5 datasets, groups, and attributes.
     No additional data should be present in that group.
-    
+
     \param rf        Random forest object to be imported
     \param filename Name of an HDF5 file to open
     \param pathname  If empty or not supplied, read from the random forest
@@ -321,7 +325,7 @@ bool rf_import_HDF5(RandomForest<T, Tag> & rf,
 */
 template<class T, class Tag>
 bool rf_import_HDF5(RandomForest<T, Tag> & rf,
-                    const std::string & filename, 
+                    const std::string & filename,
                     const std::string & pathname = "")
 {
     HDF5File h5context(filename, HDF5File::OpenReadOnly);
@@ -346,7 +350,7 @@ bool rf_import_HDF5(RandomForest<T, Tag> & rf,
                      be either relative or absolute.
 */
 template<class T, class Tag>
-bool rf_import_HDF5(RandomForest<T, Tag> & rf, 
+bool rf_import_HDF5(RandomForest<T, Tag> & rf,
                     hid_t inf_id,
                     const std::string & pathname = "")
 {

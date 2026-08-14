@@ -1,49 +1,54 @@
 ﻿#######################################################################
-#                                                                      
-#         Copyright 2009-2010 by Ullrich Koethe                        
-#                                                                      
-#    This file is part of the VIGRA computer vision library.           
-#    The VIGRA Website is                                              
-#        http://hci.iwr.uni-heidelberg.de/vigra/                       
-#    Please direct questions, bug reports, and contributions to        
-#        ullrich.koethe@iwr.uni-heidelberg.de    or                    
-#        vigra@informatik.uni-hamburg.de                               
-#                                                                      
-#    Permission is hereby granted, free of charge, to any person       
-#    obtaining a copy of this software and associated documentation    
-#    files (the "Software"), to deal in the Software without           
-#    restriction, including without limitation the rights to use,      
-#    copy, modify, merge, publish, distribute, sublicense, and/or      
-#    sell copies of the Software, and to permit persons to whom the    
-#    Software is furnished to do so, subject to the following          
-#    conditions:                                                       
-#                                                                      
-#    The above copyright notice and this permission notice shall be    
-#    included in all copies or substantial portions of the             
-#    Software.                                                         
-#                                                                      
-#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND    
-#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES   
-#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND          
-#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT       
-#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,      
-#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING      
-#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR     
-#    OTHER DEALINGS IN THE SOFTWARE.                                   
-#                                                                      
+#
+#         Copyright 2009-2010 by Ullrich Koethe
+#
+#    This file is part of the VIGRA computer vision library.
+#    The VIGRA Website is
+#        http://hci.iwr.uni-heidelberg.de/vigra/
+#    Please direct questions, bug reports, and contributions to
+#        ullrich.koethe@iwr.uni-heidelberg.de    or
+#        vigra@informatik.uni-hamburg.de
+#
+#    Permission is hereby granted, free of charge, to any person
+#    obtaining a copy of this software and associated documentation
+#    files (the "Software"), to deal in the Software without
+#    restriction, including without limitation the rights to use,
+#    copy, modify, merge, publish, distribute, sublicense, and/or
+#    sell copies of the Software, and to permit persons to whom the
+#    Software is furnished to do so, subject to the following
+#    conditions:
+#
+#    The above copyright notice and this permission notice shall be
+#    included in all copies or substantial portions of the
+#    Software.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND
+#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#    OTHER DEALINGS IN THE SOFTWARE.
+#
 #######################################################################
 
-from __future__ import division, print_function
 import sys
 print("\nexecuting test file", __file__, file=sys.stderr)
 exec(compile(open('set_paths.py', "rb").read(), 'set_paths.py', 'exec'))
 
-from nose.tools import assert_equal, raises, assert_raises
+import pytest
 import vigra
 import numpy as np
 from vigra.analysis import *
 from vigra.filters import *
 import vigra.arraytypes as at
+
+# Compatibility for
+#    from nose.tools import assert_raises
+def assert_raises(error, func, *args, **kwargs):
+    with pytest.raises(error):
+        func(*args, **kwargs)
 
 img_rgb_f = at.RGBImage(np.random.rand(100,200,3)*255,dtype=np.float32)
 img_scalar_f = at.ScalarImage(np.random.rand(100,200)*255,dtype=np.float32)
@@ -68,10 +73,10 @@ def checkShape(shape1, shape2):
         shape1 = shape1.shape
     if isinstance(shape2, np.ndarray):
         shape2 = shape2.shape
-    assert_equal(shape1, shape2)
+    assert shape1 == shape2
 
 def checkType(i,type):
-    assert_equal(i.dtype, type)
+    assert i.dtype == type
 
 def checkAboutSame(i1,i2):
     compare_shapes(i1.shape, i2.shape)
@@ -151,7 +156,7 @@ def test_MinimaMaxima():
     checkShape(vol_scalar_f,res)
     checkType(res,vol_scalar_f.dtype)
     
-    data = vigra.taggedView(np.zeros((100,200,50),dtype=np.float32), 
+    data = vigra.taggedView(np.zeros((100,200,50),dtype=np.float32),
                             vigra.defaultAxistags(3, noChannels=True))
 
     data[10,5,10]=1
@@ -178,8 +183,8 @@ def test_MinimaMaxima():
 
 def test_Region2Crack():
     res = regionImageToCrackEdgeImage(img_scalar_i)
-    assert_equal(img_scalar_f.shape[0]*2-1, res.shape[0])
-    assert_equal(img_scalar_f.shape[1]*2-1, res.shape[1])
+    assert img_scalar_f.shape[0]*2-1 == res.shape[0]
+    assert img_scalar_f.shape[1]*2-1 == res.shape[1]
     checkType(res,res.dtype)
 
     regionImageToCrackEdgeImage(img_scalar_i64[0:100,0:100], 1, img_scalar_i64)
@@ -218,7 +223,7 @@ def test_cornerss():
     checkShape(img_scalar_f, res)
     checkType(res, np.float32)
 
-def test_edges():    
+def test_edges():
     res = cannyEdgeImage(img_scalar_f, 1,128,255)
     checkShape(img_scalar_f, res)
     checkType(res, np.uint8)
@@ -232,8 +237,8 @@ def test_edges():
     checkType(res, np.uint8)
     
     res = shenCastanCrackEdgeImage(img_scalar_f, 1,128,255)
-    assert_equal(img_scalar_f.shape[0]*2-1, res.shape[0])
-    assert_equal(img_scalar_f.shape[1]*2-1, res.shape[1])
+    assert img_scalar_f.shape[0]*2-1 == res.shape[0]
+    assert img_scalar_f.shape[1]*2-1 == res.shape[1]
     
     res1 = beautifyCrackEdgeImage(res,  1, 0)
     checkShape(res1, res)
@@ -248,29 +253,29 @@ def test_edges():
     checkType(res, np.uint8)
     
     res = boundaryTensor2D(img_scalar_f, 1)
-    assert_equal(img_scalar_f.shape[0], res.shape[0])
-    assert_equal(img_scalar_f.shape[1], res.shape[1])
-    assert_equal(res.shape[2], 3)    
+    assert img_scalar_f.shape[0] == res.shape[0]
+    assert img_scalar_f.shape[1] == res.shape[1]
+    assert res.shape[2] == 3
     checkType(res, np.float32)
     
     res = hourGlassFilter2D(img_multi_f, 1, 2)
-    assert_equal(img_multi_f.shape[0], res.shape[0])
-    assert_equal(img_multi_f.shape[1], res.shape[1])
+    assert img_multi_f.shape[0] == res.shape[0]
+    assert img_multi_f.shape[1] == res.shape[1]
     checkType(res, np.float32)
     
     res = tensorEigenRepresentation2D(img_multi_f)
-    assert_equal(img_multi_f.shape[0], res.shape[0])
-    assert_equal(img_multi_f.shape[1], res.shape[1])
+    assert img_multi_f.shape[0] == res.shape[0]
+    assert img_multi_f.shape[1] == res.shape[1]
     checkType(res, np.float32)
     
     res = tensorTrace(img_multi_f)
-    assert_equal(img_multi_f.shape[0], res.shape[0])
-    assert_equal(img_multi_f.shape[1], res.shape[1])
+    assert img_multi_f.shape[0] == res.shape[0]
+    assert img_multi_f.shape[1] == res.shape[1]
     checkType(res, np.float32)
     
     res = rieszTransformOfLOG2D(img_scalar_f, 1, 1, 1)
-    assert_equal(img_multi_f.shape[0], res.shape[0])
-    assert_equal(img_multi_f.shape[1], res.shape[1])
+    assert img_multi_f.shape[0] == res.shape[0]
+    assert img_multi_f.shape[1] == res.shape[1]
     checkType(res, np.float32)
     
     

@@ -44,7 +44,7 @@
 #include <utility>
 
 namespace vigra {
-   
+
 /// set with O(n) insert and O(1) access
 ///
 /// \tparam Key key and value type of the set
@@ -73,9 +73,9 @@ public:
    /// value comperator
    typedef Compare value_compare;
    /// acclocator
-   typedef Alloc  allocator_type;
+   typedef Alloc allocator_type;
    /// const reference type
-   typedef typename Alloc::const_reference const_reference;
+   typedef const Key& const_reference;
    /// iterator type
    typedef typename VectorType::iterator iterator;
    /// const iterator type
@@ -87,9 +87,9 @@ public:
    /// const pointer type
    typedef typename VectorType::const_pointer const_pointer;
    /// const reverse iterator
-   typedef typename VectorType::const_reverse_iterator  const_reverse_iterator;
+   typedef typename VectorType::const_reverse_iterator const_reverse_iterator;
 
-   // memeber functions:
+   // member functions:
    // constructor
    RandomAccessSet(const size_t, const Compare& compare=Compare(), const Alloc& alloc=Alloc());
    RandomAccessSet(const Compare& compare=Compare(), const Alloc& alloc=Alloc());
@@ -143,7 +143,7 @@ public:
    size_t capacity()const{
        return vector_.capacity();
    }
-   
+
    template<class SET>
    void assignFromSet(const SET & set){
       vector_.assign(set.begin(),set.end());
@@ -388,7 +388,9 @@ RandomAccessSet<Key,Compare,Alloc>::insert
    }
 }
 
-/// insert a sequence of elements with a hint for the position
+/// insert an element with a hint for the position.  If the positional hint is
+/// consistent with value_comp() / the value / the neighbours, the element is
+/// inserted at position, otherwise we fall back to insertion without hint.
 ///
 /// \param position iterator to the position
 /// \param value element to insert
@@ -400,8 +402,8 @@ RandomAccessSet<Key,Compare,Alloc>::insert
    const typename RandomAccessSet<Key,Compare,Alloc>::value_type& value
 )
 {
-   if((position == begin() || this->operator()(*(position-1),value))
-   && (position == end() || this->operator()(value, *position))) {
+   if((position == begin() || value_comp()(*(position-1),value))
+   && (position == end() || value_comp()(value, *position))) {
        return vector_.insert(position, value);
    }
    return insert(value).first;

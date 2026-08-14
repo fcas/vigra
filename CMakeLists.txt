@@ -171,7 +171,7 @@ IF(WITH_BOOST_THREAD)
 ENDIF()
 
 IF(WITH_BOOST)
-    VIGRA_FIND_PACKAGE(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS ${WITH_BOOST_COMPONENTS})
+    find_package(Boost CONFIG ${BOOST_MINIMUM_VERSION} COMPONENTS ${WITH_BOOST_COMPONENTS})
     # FIXME: the following may be unstable between cmake versions
     SET(Boost_LIB_SUFFIX "${_boost_COMPILER}${_boost_MULTITHREADED}-${Boost_LIB_VERSION}")
 ENDIF()
@@ -407,7 +407,7 @@ EXPORT(TARGETS vigraimpex FILE vigra-targets.cmake)
 MESSAGE( STATUS "---------------------------------------------------------" )
 MESSAGE( STATUS "VIGRA configuration information:" )
 MESSAGE( STATUS "---------------------------------------------------------" )
-MESSAGE( STATUS "  Using CXX strandard: ${CMAKE_CXX_STANDARD}" )
+MESSAGE( STATUS "  Using CXX standard: ${CMAKE_CXX_STANDARD}" )
 
 IF(ZLIB_FOUND)
     MESSAGE( STATUS "  Using ZLIB  libraries: ${ZLIB_LIBRARIES}" )
